@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d12">
+  <meta name="description" content="Check browser frame cadence, frame timing, and display refresh behavior with RefreshTest. Learn how refresh rate, FPS, and frame time relate.">
+  <meta property="og:title" content="RefreshTest — Screen Refresh Rate Test">
+  <meta property="og:description" content="Measure browser animation cadence, inspect real frame intervals, and learn how to verify your display settings.">
+  <meta property="og:type" content="website">
+  <title>Screen Refresh Rate Test — RefreshTest</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="RefreshTest home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>REFRESH<span class="brand-light">TEST</span></span></a>
+      <div class="top-meta"><span class="live-led"></span><span>Display cadence</span><span class="version">Browser tool · 01</span></div>
+    </header>
+
+    <section class="intro">
+      <div><p class="eyebrow">Frame pacing <span>·</span> Session 01</p><h1>Screen refresh<br><em>rate test.</em></h1></div>
+      <p class="intro-copy">Measure browser animation cadence, inspect real frame intervals, and compare the result with your system display settings.</p>
+    </section>
+
+    <section class="workspace" aria-label="Refresh rate measurement">
+      <div class="instrument-head">
+        <div class="instrument-title"><span class="index">01</span><div><h2>Refresh Rate Test</h2><p>Measured browser frame cadence</p></div></div>
+      <div class="state"><span id="statusDot" class="state-dot"></span><span id="statusText" aria-live="polite">READY</span></div>
+      </div>
+      <div class="instrument-body">
+        <div class="readout">
+          <div class="readout-label"><span id="readoutCaption">Refresh rate</span><span class="unit">Browser cadence</span></div>
+          <div class="number-row"><strong id="currentHz">—</strong><span class="number-unit">Hz</span></div>
+          <div class="readout-foot"><span class="bar-icon" aria-hidden="true">▥</span><span id="rateNote">Start a test to sample live frame cadence</span><span class="live-fps"><span id="liveFps">—</span> FPS</span></div>
+        </div>
+        <div class="signal-panel">
+          <div class="signal-top"><span>Frame interval · ms</span><span id="sampleCount">0 samples</span></div>
+          <canvas id="frameGraph" role="img" aria-label="Frame interval chart in milliseconds. Teal shows typical intervals; amber and red show longer intervals."></canvas>
+          <div class="graph-scale"><span>Older</span><span class="target-key"><i class="trace-key"></i> Trace <i></i> Median <i class="spike-key"></i> Long interval</span><span>Live</span></div>
+        </div>
+      </div>
+      <div class="stats-grid" aria-label="Test statistics">
+        <div class="metric"><span>Average FPS</span><strong id="avgFps">—</strong><small>Callback rate</small></div>
+        <div class="metric"><span>Minimum FPS</span><strong id="minFps">—</strong><small>Per interval</small></div>
+        <div class="metric"><span>Maximum FPS</span><strong id="maxFps">—</strong><small>Per interval</small></div>
+        <div class="metric"><span>Average frame time</span><strong id="avgFrameTime">— <small>ms</small></strong><small>Mean interval</small></div>
+        <div class="metric"><span>Min / max frame</span><strong id="minMaxFrameTime">— <small>/</small> — <small>ms</small></strong><small>Observed interval</small></div>
+        <div class="metric"><span>Frame variation</span><strong id="variation">— <small>ms</small></strong><small>Standard deviation</small></div>
+        <div class="metric stability-metric"><span>Refresh stability</span><strong id="stability">—<small>%</small></strong><small><span id="stabilityLabel">STABLE</span> · ±5% of median</small></div>
+        <div class="metric"><span>Frames tested</span><strong id="framesTested">—</strong><small>Valid intervals</small></div>
+        <div class="metric"><span>Test duration</span><strong id="testDuration">— <small>s</small></strong><small>Active time</small></div>
+      </div>
+      <p class="stability-note">Stability is the share of accepted intervals within ±5% of the measured median. It describes browser cadence consistency during this sample, not display hardware quality.</p>
+      <div class="control-row">
+        <button id="startTest" class="run-button" type="button"><span class="button-symbol">▶</span><span>Run measurement</span><span class="button-arrow">↗</span></button>
+        <div class="motion-control"><div class="motion-copy"><span class="control-label">Motion test</span><span id="speedLabel">Speed · 1×</span></div><div class="speed-buttons" role="group" aria-label="Motion speed"><button type="button" data-speed="1" aria-pressed="true">1×</button><button type="button" data-speed="2" aria-pressed="false">2×</button><button type="button" data-speed="4" aria-pressed="false">4×</button></div></div>
+        <div class="test-length"><span class="control-label">Sample window</span><strong>8 <small>seconds</small></strong></div>
+      </div>
+      <div class="motion-stage" aria-label="Motion test area"><div class="motion-track"><span class="track-mark mark-a"></span><span class="track-mark mark-b"></span><span class="track-mark mark-c"></span><div id="motionObject" class="motion-object"><span></span></div></div><div class="motion-caption"><span>Travel</span><span>Visual smoothness demo · not a response-time test</span><span>Return</span></div><p class="motion-note">Motion appearance depends on refresh rate, response time, persistence, browser rendering, and viewing conditions.</p></div>
+    </section>
+
+    <section class="details">
+      <div class="detail-heading"><span class="index">02</span><div><h2>Environment</h2><p>Session context</p></div></div>
+      <div><p class="environment-note">Screen values are browser-reported CSS dimensions and pixel ratio, not a guarantee of the panel’s native resolution.</p><div class="environment-grid"><div><span>Screen size · CSS px</span><strong id="resolution">—</strong></div><div><span>Viewport</span><strong id="viewport">—</strong></div><div><span>Pixel ratio</span><strong id="pixelRatio">—</strong></div><div><span>Browser</span><strong id="browser">—</strong></div><div><span>Operating system</span><strong id="operatingSystem">—</strong></div></div></div>
+    </section>
+    <div class="content-sections">
+      <section class="editorial-section" aria-labelledby="what-is-refresh-rate">
+        <div class="section-heading"><span class="index">03</span><div><p class="eyebrow">BASICS</p><h2 id="what-is-refresh-rate">What Is Screen Refresh Rate?</h2><p class="section-lede">Three related measurements describe how a display and rendering system present motion. They connect, but they are not interchangeable.</p></div></div>
+        <div class="concept-grid">
+          <article class="concept"><span class="concept-index">01 / Display</span><h3>Refresh rate <em>· Hz</em></h3><p>Refresh rate describes how often a display can update its image each second. A higher rate can make motion appear smoother and can reduce the time between scanouts, when the system and content can use it.</p><div class="timing-list"><span>60 Hz <b>≈ 16.67 ms</b></span><span>120 Hz <b>≈ 8.33 ms</b></span><span>144 Hz <b>≈ 6.94 ms</b></span><span>240 Hz <b>≈ 4.17 ms</b></span></div></article>
+          <article class="concept"><span class="concept-index">02 / Rendering</span><h3>Frame rate <em>· FPS</em></h3><p>FPS counts the frames a rendering system produces or presents per second. Browser animation callbacks are commonly synchronized with a display pipeline, but results depend on the browser, operating system, GPU, power mode, display configuration, and variable refresh behavior. FPS does not always equal monitor refresh rate.</p></article>
+          <article class="concept"><span class="concept-index">03 / Timing</span><h3>Frame time <em>· ms</em></h3><p>Frame time is the interval between frames. At 60 FPS, an average frame takes about 16.67 ms; at 120 FPS, 8.33 ms. Consistent timing matters: uneven intervals can make motion feel less smooth even when the average FPS looks unchanged.</p></article>
+        </div>
+        <p class="method-note"><span>METHOD NOTE</span> RefreshTest estimates browser frame cadence from animation callback timestamps. It does not query the panel’s exact hardware refresh rate or measure pixel response time.</p>
+      </section>
+
+      <section class="editorial-section" aria-labelledby="how-to-test">
+        <div class="section-heading"><span class="index">04</span><div><p class="eyebrow">TEST PROCEDURE</p><h2 id="how-to-test">How to Test Refresh Rate</h2></div></div>
+        <div class="steps-grid">
+          <article class="step"><span class="step-number">01</span><div><h3>Confirm system settings</h3><p>Check the selected refresh rate in your operating system first.</p><ul><li>Windows: Settings → System → Display → Advanced display</li><li>macOS: System Settings → Displays</li></ul></div></article>
+          <article class="step"><span class="step-number">02</span><div><h3>Run the browser test</h3><p>Keep this tab active and compare the measured browser cadence with your configured display mode. If it seems low, check hardware acceleration, power settings, GPU/display configuration, and heavy background apps.</p></div></article>
+          <article class="step"><span class="step-number">03</span><div><h3>Verify motion</h3><p>Use the motion strip to inspect a moving shape at different speeds. It demonstrates motion smoothness only; professional panel tests are needed for response time, persistence, and artifacts.</p></div></article>
+        </div>
+      </section>
+
+      <section class="editorial-section" aria-labelledby="standards">
+        <div class="section-heading"><span class="index">05</span><div><p class="eyebrow">REFERENCE</p><h2 id="standards">Refresh Rate Standards Explained</h2><p class="section-lede">Useful ranges depend on the task, the content, and whether the system can sustain the matching frame rate.</p></div></div>
+        <div class="standards-grid">
+          <article><strong>60 Hz</strong><span>Standard</span><p>Common for general computing, office work, and many video workflows.</p></article>
+          <article><strong>120 / 144 Hz</strong><span>High refresh</span><p>Noticeably smoother desktop motion and a common step up for gaming.</p></article>
+          <article><strong>165 Hz</strong><span>High refresh · gaming</span><p>More frequent updates for responsive play when the system can deliver frames.</p></article>
+          <article><strong>240 Hz</strong><span>Competitive high refresh</span><p>Useful for fast interactive content; benefits diminish as rates rise.</p></article>
+          <article><strong>360 Hz+</strong><span>Extreme competitive</span><p>A specialized option where frame delivery, latency, and player preference align.</p></article>
+          <article><strong>VRR</strong><span>Variable refresh rate</span><p>Allows compatible displays to vary update timing within a supported range to better follow frame delivery.</p></article>
+        </div>
+      </section>
+
+      <section class="editorial-section" aria-labelledby="use-cases">
+        <div class="section-heading"><span class="index">06</span><div><p class="eyebrow">USE CASES</p><h2 id="use-cases">Refresh Rate Needs by Use Case</h2></div></div>
+        <div class="usecase-list">
+          <article><h3>Office &amp; web</h3><p>60 Hz is adequate for many tasks; higher rates can make scrolling and pointer motion feel smoother.</p></article>
+          <article><h3>Gaming</h3><p>Higher refresh can improve motion clarity and responsiveness. GPU performance, in-game FPS, response time, and VRR also matter.</p></article>
+          <article><h3>Competitive gaming</h3><p>High refresh may help expose more frequent updates, if the game and hardware sustain them. It is not a requirement for every player or title.</p></article>
+          <article><h3>Video &amp; film</h3><p>Content frame rate and cadence often matter more than maximizing display Hz; compatible refresh modes can reduce judder.</p></article>
+          <article><h3>Content creation</h3><p>A stable, color-appropriate display may matter more than peak refresh for many workflows; higher Hz can still improve interface motion.</p></article>
+          <article><h3>Mobile devices</h3><p>Higher refresh can smooth scrolling, while adaptive modes may reduce power use when fast updates are unnecessary.</p></article>
+        </div>
+      </section>
+
+      <section class="editorial-section" aria-labelledby="ensure-refresh">
+        <div class="section-heading"><span class="index">07</span><div><p class="eyebrow">CONFIGURATION</p><h2 id="ensure-refresh">Ensuring High Refresh Rate Is Active</h2><p class="section-lede">The configured mode is limited by the capabilities of the whole display chain.</p></div></div>
+        <div class="setup-grid">
+          <article><h3>System settings</h3><p>Choose the intended mode in Windows Advanced display or macOS Displays settings.</p></article>
+          <article><h3>Cable &amp; connection</h3><p>Maximum resolution and refresh depend on connector versions, display and GPU capabilities, cable bandwidth, and compression support where applicable.</p></article>
+          <article><h3>Browser acceleration</h3><p>Hardware acceleration can affect rendering and callback cadence. Compare settings only after restarting the browser.</p></article>
+          <article><h3>GPU settings</h3><p>Review NVIDIA, AMD, or Intel display configuration and ensure the intended monitor and mode are selected.</p></article>
+          <article><h3>Laptop power mode</h3><p>Power-saving modes may change performance or display behavior. Test while plugged in if appropriate.</p></article>
+          <article><h3>VRR configuration</h3><p>Confirm variable refresh is supported and enabled in the display, operating system, GPU driver, and application path.</p></article>
+        </div>
+        <aside class="setup-tip"><h3>Refresh Rate Setup Tips</h3><ul><li><b>Windows / macOS:</b> verify the selected mode in Advanced display or System Settings → Displays.</li><li><b>GPU:</b> check NVIDIA, AMD, or Intel display settings.</li><li><b>Browser:</b> review hardware acceleration, then restart the browser after changing it.</li><li><b>Power:</b> avoid aggressive power-saving modes during comparison.</li><li><b>Verification:</b> keep the tab active and close heavy background workloads.</li></ul></aside>
+      </section>
+
+      <section class="editorial-section faq-section" aria-labelledby="faq-title">
+        <div class="section-heading"><span class="index">08</span><div><p class="eyebrow">QUESTIONS</p><h2 id="faq-title">Frequently Asked Questions</h2></div></div>
+        <div class="faq-list">
+          <details><summary>Why does it show 60 Hz when my screen is 144 Hz?</summary><p>The browser may be receiving callbacks at 60 Hz because of system display settings, a display path limitation, browser/GPU configuration, power mode, or compositing behavior. Verify the active mode in system settings and keep the page in the foreground.</p></details>
+          <details><summary>Is the browser measurement accurate?</summary><p>It measures intervals between browser animation callbacks, which are often synchronized to the display pipeline. It is useful for checking browser cadence, but it is not a direct hardware measurement and can differ from the panel’s configured refresh rate.</p></details>
+          <details><summary>Why are there spikes in the frame-time chart?</summary><p>A spike means one callback arrived later than nearby callbacks. Heavy CPU/GPU work, background activity, compositing, power management, or a missed presentation opportunity can cause it. Very large gaps are excluded from the cadence estimate and reported separately.</p></details>
+          <details><summary>What is the difference between Hz and FPS?</summary><p>Hz describes display update frequency. FPS describes frame production or presentation rate. Browser rendering is commonly synchronized with the display pipeline, but the two values do not always match.</p></details>
+          <details><summary>What is frame time?</summary><p>Frame time is the time between frames, measured in milliseconds. Consistent frame times usually produce steadier motion than irregular timing with the same average FPS.</p></details>
+          <details><summary>Why can my refresh rate change?</summary><p>Operating-system modes, VRR, battery settings, display connections, GPU load, browser behavior, and whether the page is visible can all affect callback cadence.</p></details>
+          <details><summary>What is VRR?</summary><p>Variable Refresh Rate lets a compatible display adjust its update timing to follow frame delivery within a supported operating range. Exact behavior depends on the display, GPU, software, and configuration.</p></details>
+          <details><summary>Does higher refresh rate reduce input latency?</summary><p>It can reduce the time between display updates, but total input latency also depends on input polling, game/application processing, frame queues, GPU load, scanout, and pixel response.</p></details>
+          <details><summary>Can this test measure monitor response time?</summary><p>No. Browser animation cannot measure pixel transitions, GtG, MPRT, or panel response time. Those require dedicated measurement equipment and test patterns.</p></details>
+          <details><summary>Can this test detect my monitor’s exact hardware refresh rate?</summary><p>No. Browser APIs expose animation callback timing, not a guaranteed exact panel refresh rate or native resolution.</p></details>
+          <details><summary>Why can two browsers produce different results?</summary><p>Browsers can use different compositors, GPU paths, scheduling policies, and power behavior, even on the same system and display.</p></details>
+          <details><summary>Why does the result change when I move the browser window?</summary><p>Moving a window between displays or changing its visibility can change which display pipeline, refresh mode, or compositor behavior drives its callbacks.</p></details>
+        </div>
+      </section>
+    </div>
+    <footer><p><span class="foot-mark">RT</span> REFRESHTEST <span class="foot-sep">/</span> FRAME PERFORMANCE TOOL</p><p class="caveat">Refresh rate is estimated from browser/VSync animation callback cadence. Background throttling, compositing, and dropped frames affect results; this is not a direct measurement of the physical panel.</p></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
