@@ -1,7 +1,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const canvas = $("frameGraph");
-  const context = canvas.getContext("2d");
+  const context = canvas && canvas.getContext ? canvas.getContext("2d") : null;
   const runButton = $("startTest");
   const motion = $("motionObject");
   const track = document.querySelector(".motion-track");
@@ -10,12 +10,14 @@
   const SAMPLE_MS = 8000;
   const MAX_INTERVAL_MS = 250;
   const MAX_SAMPLES = 12000;
+  const RENDER_INTERVAL_MS = 100;
   let testing = false;
   let startTime = 0;
   let elapsedBeforePause = 0;
   let previousFrameTimestamp = null;
   let pausedAt = null;
   let discardedGaps = 0;
+  let longestDiscardedGap = 0;
   let measureFrame = 0;
   let motionFrame = 0;
   let lastGraphDraw = 0;
@@ -52,6 +54,7 @@
 
   function setMetricParts(id, parts) {
     const output = $(id);
+    if (!output) return;
     const fragment = document.createDocumentFragment();
     parts.forEach(({ text, small = false }) => {
       if (small) {
@@ -70,6 +73,16 @@
     const ordered = [...values].sort((a, b) => a - b);
     const mid = Math.floor(ordered.length / 2);
     return ordered.length % 2 ? ordered[mid] : (ordered[mid - 1] + ordered[mid]) / 2;
+  }
+
+  function minMax(values) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const value of values) {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
+    return { min, max };
   }
 
   function drawGraph() {
@@ -162,14 +175,13 @@
 
   function renderLive(timestamp) {
     if (frameIntervals.length < 2) return;
+    if (timestamp - lastGraphDraw < RENDER_INTERVAL_MS) return;
+    lastGraphDraw = timestamp;
     const recent = frameIntervals.slice(-31);
     $("currentHz").textContent = (1000 / median(recent)).toFixed(1);
     $("liveFps").textContent = (1000 / frameIntervals[frameIntervals.length - 1]).toFixed(1);
     $("sampleCount").textContent = `${frameIntervals.length.toLocaleString()} samples`;
-    if (timestamp - lastGraphDraw >= 33) {
-      lastGraphDraw = timestamp;
-      drawGraph();
-    }
+    drawGraph();
   }
 
   function measure(frameTimestamp) {
@@ -182,7 +194,8 @@
         renderLive(now);
       } else if (delta > MAX_INTERVAL_MS) {
         discardedGaps++;
-        $("rateNote").textContent = `${discardedGaps} long callback gap${discardedGaps === 1 ? "" : "s"} excluded from cadence`;
+        longestDiscardedGap = Math.max(longestDiscardedGap, delta);
+        $("rateNote").textContent = `${discardedGaps} long callback gap${discardedGaps === 1 ? "" : "s"} excluded from cadence · longest ${longestDiscardedGap.toFixed(0)} ms`;
       }
     }
     previousFrameTimestamp = frameTimestamp;
@@ -195,6 +208,7 @@
     if (testing) return;
     frameIntervals.length = 0;
     discardedGaps = 0;
+    longestDiscardedGap = 0;
     previousFrameTimestamp = null;
     elapsedBeforePause = 0;
     pausedAt = null;
@@ -234,17 +248,15 @@
     const typical = median(frameIntervals);
     const variance = frameIntervals.reduce((sum, value) => sum + (value - mean) ** 2, 0) / frameIntervals.length;
     const deviation = Math.sqrt(variance);
-    const tolerance = Math.max(1, typical * 0.05);
+    const tolerance = typical * 0.05;
     const stability = frameIntervals.filter((value) => Math.abs(value - typical) <= tolerance).length / frameIntervals.length * 100;
-    const rates = frameIntervals.map((value) => 1000 / value);
-    const minFrame = Math.min(...frameIntervals);
-    const maxFrame = Math.max(...frameIntervals);
+    const { min: minFrame, max: maxFrame } = minMax(frameIntervals);
     $("currentHz").textContent = (1000 / typical).toFixed(1);
     $("liveFps").textContent = (1000 / frameIntervals[frameIntervals.length - 1]).toFixed(1);
     $("readoutCaption").textContent = "Measured browser frame cadence";
     $("avgFps").textContent = (1000 / mean).toFixed(1);
-    $("minFps").textContent = Math.min(...rates).toFixed(1);
-    $("maxFps").textContent = Math.max(...rates).toFixed(1);
+    $("minFps").textContent = (1000 / maxFrame).toFixed(1);
+    $("maxFps").textContent = (1000 / minFrame).toFixed(1);
     setMetricParts("avgFrameTime", [{ text: `${mean.toFixed(2)} ` }, { text: "ms", small: true }]);
     setMetricParts("minMaxFrameTime", [{ text: `${minFrame.toFixed(2)} ` }, { text: "/", small: true }, { text: ` ${maxFrame.toFixed(2)} ` }, { text: "ms", small: true }]);
     setMetricParts("variation", [{ text: `${deviation.toFixed(2)} ` }, { text: "ms", small: true }]);
@@ -253,7 +265,9 @@
     $("framesTested").textContent = frameIntervals.length.toLocaleString();
     setMetricParts("testDuration", [{ text: `${(elapsed / 1000).toFixed(1)} ` }, { text: "s", small: true }]);
     $("sampleCount").textContent = `${frameIntervals.length.toLocaleString()} samples`;
-    $("rateNote").textContent = `${discardedGaps} long gap${discardedGaps === 1 ? "" : "s"} excluded · cadence uses median interval`;
+    $("rateNote").textContent = discardedGaps
+      ? `${discardedGaps} long gap${discardedGaps === 1 ? "" : "s"} excluded · longest ${longestDiscardedGap.toFixed(0)} ms · cadence uses median interval`
+      : "0 long gaps excluded · cadence uses median interval";
     setStatus("SAMPLE COMPLETE", "complete");
     setRunButton("Run again");
     drawGraph();
@@ -301,7 +315,7 @@
     }
   });
   window.addEventListener("resize", updateEnvironment);
-  if ("ResizeObserver" in window) new ResizeObserver(drawGraph).observe(canvas);
+  if (canvas && "ResizeObserver" in window) new ResizeObserver(drawGraph).observe(canvas);
   updateEnvironment();
   resetStatistics();
   motionFrame = requestAnimationFrame(animateMotion);
