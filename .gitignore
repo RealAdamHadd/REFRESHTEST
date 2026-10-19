@@ -1,0 +1,39 @@
+# Local configuration and credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+secrets.json
+.npmrc
+.pypirc
+id_rsa*
+id_ed25519*
+*.tfstate
+
+# Dependencies and generated output
+node_modules/
+dist/
+build/
+*.map
+
+# Logs, editor state, and temporary copies
+*.log
+*.bak
+*.backup
+*.orig
+*.swp
+*~
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.history/
+
+# Repository and common hosting state
+.git/
+.netlify/
+.vercel/
