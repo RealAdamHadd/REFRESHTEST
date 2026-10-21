@@ -1,0 +1,15 @@
+# Keep Node-only tests, internal planning notes, and repository metadata out of
+# the static site deployment. Wrangler reads .assetsignore from the configured
+# assets directory (the repo root in wrangler.jsonc) and uses .gitignore syntax.
+tests/
+node_modules/
+.wrangler/
+package*.json
+pnpm-lock.yaml
+yarn.lock
+IMPLEMENTATION_PLAN.md
+CHANGELOG.md
+wrangler.jsonc
+.assetsignore
+.git/
+.gitignore
