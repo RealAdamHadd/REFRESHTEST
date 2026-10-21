@@ -1,0 +1,15 @@
+# Response headers for the static RefreshTest app.
+# Workers static assets parses this file; it is not served as an asset.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
+
+# Workers static assets labels .ico files as text/html by default, which is
+# incompatible with nosniff. Override the media type for the favicon.
+/favicon.ico
+  Content-Type: image/x-icon
+
+# HSTS is limited to this host for one year. includeSubDomains and preload are
+# intentionally omitted pending separate validation.
