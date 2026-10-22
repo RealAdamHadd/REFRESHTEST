@@ -260,7 +260,43 @@ test("variation and stability cannot produce contradictory conclusions", () => {
   const highVariation = high.findings.find((item) => item.id === "variation-high");
   assert.ok(highVariation);
   assert.match(highVariation.explanation, /different properties|more cautious/);
-  assert.doesNotMatch(high.headline, /consistent/i);
+  assert.equal(highVariation.title, "Overall variability was high despite a stable core");
+  assert.doesNotMatch(high.headline, /varied substantially/i);
+  assert.equal(high.headline, "Measured cadence centered near 100.0 FPS");
+});
+
+test("a STABLE sample is never headlined as substantially varied by outliers", () => {
+  // Isolated late callbacks lift CV above the high threshold while 98% of the
+  // intervals remain inside the stability band, so the badge reads STABLE.
+  const stableWithTail = summary(repeat(10, 98).concat([200, 200]));
+  assert.equal(stableWithTail.stabilityClassification, "STABLE");
+  assert.ok(stableWithTail.coefficientOfVariation > Insights.THRESHOLDS.MODERATE_VARIATION_CV);
+
+  const tailed = Insights.buildInsights(stableWithTail, {});
+  assert.ok(ids(tailed).includes("variation-high"));
+  assert.ok(ids(tailed).includes("interval-tail"));
+  assert.equal(tailed.findings.find((item) => item.id === "variation-high").title, "Overall variability was high despite a stable core");
+  assert.equal(tailed.headline, "Upper-tail intervals were longer than typical");
+
+  // Without a flagged tail, the headline falls back to neutral cadence copy
+  // instead of contradicting the STABLE badge.
+  const outlierOnly = summary(repeat(10, 57).concat(repeat(20, 3)));
+  assert.equal(outlierOnly.stabilityClassification, "STABLE");
+  const fallback = Insights.buildInsights(outlierOnly, {});
+  assert.ok(ids(fallback).includes("variation-high"));
+  assert.ok(!ids(fallback).includes("interval-tail"));
+  assert.equal(fallback.findings.find((item) => item.id === "variation-high").title, "Overall variability was high despite a stable core");
+  assert.equal(fallback.headline, "Measured cadence centered near 100.0 FPS");
+  assert.doesNotMatch(fallback.headline, /varied substantially/i);
+
+  // Samples that are not STABLE keep the existing warning headline and card.
+  const variable = summary(repeat(8, 50).concat(repeat(30, 50)));
+  assert.notEqual(variable.stabilityClassification, "STABLE");
+  const variableInsights = Insights.buildInsights(variable, {});
+  assert.ok(ids(variableInsights).includes("variation-high"));
+  const variableFinding = variableInsights.findings.find((item) => item.id === "variation-high");
+  assert.equal(variableFinding.title, "Frame timing varied substantially in this sample");
+  assert.equal(variableInsights.headline, "Frame timing varied substantially in this sample");
 });
 
 test("reconciled variation uses the more cautious band at boundaries", () => {

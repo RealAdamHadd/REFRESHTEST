@@ -391,12 +391,21 @@
           metrics
         ));
       } else {
+        // A STABLE sample can only reach this branch through a high coefficient
+        // of variation, which is driven by a small number of late intervals.
+        // Naming the core cadence as stable keeps the card consistent with the
+        // displayed stability badge while still disclosing the real spread.
+        const stableCore = safeSummary.stabilityClassification === "STABLE";
         findings.push(finding(
           "variation-high",
           SEVERITY.WARNING,
-          "Frame timing varied substantially in this sample",
+          stableCore
+            ? "Overall variability was high despite a stable core"
+            : "Frame timing varied substantially in this sample",
           evidence,
-          `Accepted intervals were widely spread around the median.${divergence} This can make motion less even when the average rate looks similar; it does not identify a hardware fault.`,
+          stableCore
+            ? `A small number of late intervals raised the coefficient of variation while most accepted intervals stayed near the median.${divergence} This can reduce perceived smoothness even when the typical cadence is steady; it does not identify a hardware fault.`
+            : `Accepted intervals were widely spread around the median.${divergence} This can make motion less even when the average rate looks similar; it does not identify a hardware fault.`,
           "Check background activity, power mode, browser acceleration, and the active display mode, then repeat the test under similar conditions.",
           CONFIDENCE.MEASURED,
           metrics
@@ -600,11 +609,23 @@
   }
 
   function headlineFor(summary, findings) {
-    const variation = findings.find((item) => item.id === "variation-high" || item.id === "variation-moderate");
+    // The displayed stability badge is driven by summary.stabilityClassification.
+    // A STABLE sample can still reach the HIGH coefficient-of-variation band
+    // because CV counts every observation, including isolated late callbacks.
+    // Headlining "varied substantially" would then contradict the badge, so the
+    // high-variation headline is skipped for STABLE samples: a flagged upper
+    // tail describes the outliers, otherwise the neutral cadence headline is used.
+    const stableSample = summary && summary.stabilityClassification === "STABLE";
+    const variation = findings.find((item) => item.id === "variation-moderate"
+      || (item.id === "variation-high" && !stableSample));
     if (variation) return variation.title;
     const sufficiency = findings.find((item) => item.id === "sample-sufficiency");
     if (sufficiency) return "Limited sample: interpret with caution";
     if (findings.some((item) => item.id === "variation-low")) return "Frame timing was consistent in this sample";
+    if (stableSample) {
+      const tail = findings.find((item) => item.id === "interval-tail");
+      if (tail) return tail.title;
+    }
     if (findings.some((item) => item.id === "long-gaps-excluded")) return "Cadence excludes long callback gaps";
     if (summary && isFiniteNumber(summary.medianFps)) {
       return `Measured cadence centered near ${formatNumber(summary.medianFps, 1)} FPS`;

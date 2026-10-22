@@ -4,6 +4,19 @@ All notable changes to **RefreshTest** are documented in this file.
 
 RefreshTest is a browser tool that **estimates** display refresh cadence from `requestAnimationFrame` (animation callback) timing. It does not read a panel's physical hardware refresh rate, and it cannot measure pixel response time. This changelog records engineering changes to the measurement logic and UI behavior only.
 
+## v2.0.1 — Bug fix release
+
+### Fixed
+
+1. **Stable samples no longer carry contradictory insight wording.**
+   When the stability badge reads `STABLE` but a few isolated late callbacks push the coefficient of variation into the high band, the insight headline no longer says "Frame timing varied substantially in this sample". It now names a flagged upper tail when one exists, or falls back to the neutral measured-cadence headline. The corresponding card is retitled "Overall variability was high despite a stable core" and explains that the spread comes from a small number of late intervals rather than the core cadence. Samples that are not `STABLE` keep the existing warning wording.
+
+### Verification
+
+- `node --test`: **131 passing tests**, including new regression coverage for `STABLE` samples with and without a flagged upper tail and for the unchanged non-`STABLE` headline.
+- `node --check` passed for every runtime and test JavaScript file.
+- No HTML, CSS, or visual-design changes.
+
 ## Finalization audit — correctness and release readiness
 
 ### Fixed
