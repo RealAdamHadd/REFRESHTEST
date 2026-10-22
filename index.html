@@ -8,18 +8,28 @@
   <meta property="og:title" content="RefreshTest — Screen Refresh Rate Test">
   <meta property="og:description" content="Measure browser animation cadence, inspect real frame intervals, and learn how to verify your display settings.">
   <meta property="og:type" content="website">
+  <meta name="google-site-verification" content="ki-nU6FbdBNl4iP7ONhNVGemxj4Ntd08KofuYDOg_5I" />
   <title>Screen Refresh Rate Test — RefreshTest</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" sizes="32x32">
 </head>
 <body>
-  <main class="shell">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <main class="shell" id="main-content">
     <header class="topbar">
-      <a class="brand" href="#" aria-label="RefreshTest home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>REFRESH<span class="brand-light">TEST</span></span></a>
-      <div class="top-meta"><span class="live-led"></span><span>Display cadence</span><span class="version">Browser tool · 01</span></div>
+      <a class="brand" href="#test" aria-label="RefreshTest home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>REFRESH<span class="brand-light">TEST</span></span></a>
+      <nav class="primary-nav" aria-label="Primary">
+        <a class="nav-link" href="#test" data-view-link="test" aria-current="page">Test</a>
+        <a class="nav-link" href="#history" data-view-link="history">History<span class="nav-count" id="historyCount" hidden>0</span></a>
+        <a class="nav-link" href="#compare" data-view-link="compare">Compare</a>
+        <a class="nav-link" href="#lab" data-view-link="lab">Lab</a>
+      </nav>
+      <div class="top-meta"><span class="live-led"></span><span>Display cadence</span><span class="version">Browser tool · 02</span></div>
     </header>
 
+    <section class="view" id="view-test" data-view="test" aria-labelledby="testTitle">
     <section class="intro">
-      <div><p class="eyebrow">Frame pacing <span>·</span> Session 01</p><h1>Screen refresh<br><em>rate test.</em></h1></div>
+      <div><p class="eyebrow">Frame pacing <span>·</span> Session 01</p><h1 id="testTitle" tabindex="-1">Screen refresh<br><em>rate test.</em></h1></div>
       <p class="intro-copy">Measure browser animation cadence, inspect real frame intervals, and compare the result with your system display settings.</p>
     </section>
 
@@ -41,23 +51,52 @@
         </div>
       </div>
       <div class="stats-grid" aria-label="Test statistics">
-        <div class="metric"><span>Average FPS</span><strong id="avgFps">—</strong><small>Callback rate</small></div>
-        <div class="metric"><span>Minimum FPS</span><strong id="minFps">—</strong><small>Per interval</small></div>
-        <div class="metric"><span>Maximum FPS</span><strong id="maxFps">—</strong><small>Per interval</small></div>
-        <div class="metric"><span>Average frame time</span><strong id="avgFrameTime">— <small>ms</small></strong><small>Mean interval</small></div>
-        <div class="metric"><span>Min / max frame</span><strong id="minMaxFrameTime">— <small>/</small> — <small>ms</small></strong><small>Observed interval</small></div>
-        <div class="metric"><span>Frame variation</span><strong id="variation">— <small>ms</small></strong><small>Standard deviation</small></div>
-        <div class="metric stability-metric"><span>Refresh stability</span><strong id="stability">—<small>%</small></strong><small><span id="stabilityLabel">STABLE</span> · ±5% of median</small></div>
-        <div class="metric"><span>Frames tested</span><strong id="framesTested">—</strong><small>Valid intervals</small></div>
-        <div class="metric"><span>Test duration</span><strong id="testDuration">— <small>s</small></strong><small>Active time</small></div>
+        <div class="metric"><span>Average FPS</span><strong id="avgFps">—</strong><small>1000 / mean interval</small></div>
+        <div class="metric"><span>Minimum FPS</span><strong id="minFps">—</strong><small>From longest interval</small></div>
+        <div class="metric"><span>Maximum FPS</span><strong id="maxFps">—</strong><small>From shortest interval</small></div>
+        <div class="metric"><span>Average frame time</span><strong id="avgFrameTime">— <small>ms</small></strong><small>Mean accepted interval</small></div>
+        <div class="metric"><span>Min / max frame</span><strong id="minMaxFrameTime">— <small>/</small> — <small>ms</small></strong><small>Accepted range</small></div>
+        <div class="metric"><span>Frame variation</span><strong id="variation">— <small>ms</small></strong><small>Population σ</small></div>
+        <div class="metric stability-metric"><span>Refresh stability</span><strong id="stability">—<small>%</small></strong><small><span id="stabilityLabel">NO DATA</span> · ±5% of median</small></div>
+        <div class="metric"><span>Frames tested</span><strong id="framesTested">—</strong><small>Accepted intervals</small></div>
+        <div class="metric"><span>Test duration</span><strong id="testDuration">— <small>s</small></strong><small>Excludes hidden time</small></div>
       </div>
-      <p class="stability-note">Stability is the share of accepted intervals within ±5% of the measured median. It describes browser cadence consistency during this sample, not display hardware quality.</p>
+      <div class="percentile-grid" aria-label="Tail and coverage statistics">
+        <div class="percentile-metric"><span>P50 interval</span><strong id="p50Interval">— <small>ms</small></strong><small>Median accepted interval</small></div>
+        <div class="percentile-metric"><span>P95 interval</span><strong id="p95Interval">— <small>ms</small></strong><small id="p95Note">Needs 30 accepted</small></div>
+        <div class="percentile-metric"><span>P99 interval</span><strong id="p99Interval">— <small>ms</small></strong><small id="p99Note">Needs 100 accepted</small></div>
+        <div class="percentile-metric"><span>Usable coverage</span><strong id="coverage">— <small>%</small></strong><small>Accepted vs excluded time</small></div>
+      </div>
+      <p class="stability-note"><span id="diagnostics" aria-live="polite">P95 — (needs 30 accepted) · 0 accepted · 0 long gaps · coverage —</span><br>Stability is the share of accepted intervals within ±5% of the measured median. It describes browser cadence consistency during this sample, not display hardware quality. Long callback gaps are excluded from headline cadence statistics; coverage describes retained interval time, not every physical display frame.</p>
+      <div class="result-extras" id="resultExtras" hidden>
+        <div class="result-copy"><span class="control-label">Result</span><p id="resultSummary">Measurement complete.</p></div>
+        <div class="action-buttons">
+          <button id="saveSession" class="secondary-button" type="button">Save session</button>
+          <button id="exportResult" class="secondary-button" type="button">Export JSON</button>
+        </div>
+      </div>
+      <p id="saveStatus" class="inline-status" role="status" aria-live="polite"></p>
+      <div class="mode-strip">
+        <div class="mode-strip-copy"><span class="control-label" id="modeLabel">Measurement mode</span><p id="modeDescription">Standard samples 8 seconds of active time. Longer modes are optional.</p></div>
+        <div class="mode-buttons" role="group" aria-label="Measurement mode">
+          <button type="button" data-mode="quick" aria-pressed="false">Quick <small>3 s</small></button>
+          <button type="button" data-mode="standard" aria-pressed="true">Standard <small>8 s</small></button>
+          <button type="button" data-mode="extended" aria-pressed="false">Extended <small>20 s</small></button>
+          <button type="button" data-mode="diagnostics" aria-pressed="false">Diagnostics <small>30 s</small></button>
+        </div>
+      </div>
       <div class="control-row">
         <button id="startTest" class="run-button" type="button"><span class="button-symbol">▶</span><span>Run measurement</span><span class="button-arrow">↗</span></button>
         <div class="motion-control"><div class="motion-copy"><span class="control-label">Motion test</span><span id="speedLabel">Speed · 1×</span></div><div class="speed-buttons" role="group" aria-label="Motion speed"><button type="button" data-speed="1" aria-pressed="true">1×</button><button type="button" data-speed="2" aria-pressed="false">2×</button><button type="button" data-speed="4" aria-pressed="false">4×</button></div></div>
-        <div class="test-length"><span class="control-label">Sample window</span><strong>8 <small>seconds</small></strong></div>
+        <div class="test-length"><span class="control-label">Sample window</span><strong id="sampleWindowValue">8 <small>seconds</small></strong></div>
       </div>
       <div class="motion-stage" aria-label="Motion test area"><div class="motion-track"><span class="track-mark mark-a"></span><span class="track-mark mark-b"></span><span class="track-mark mark-c"></span><div id="motionObject" class="motion-object"><span></span></div></div><div class="motion-caption"><span>Travel</span><span>Visual smoothness demo · not a response-time test</span><span>Return</span></div><p class="motion-note">Motion appearance depends on refresh rate, response time, persistence, browser rendering, and viewing conditions.</p></div>
+      <section class="insight-panel" id="insightPanel" aria-labelledby="insightTitle" hidden>
+        <div class="panel-heading"><span class="index">A</span><div><h3 id="insightTitle">Result insights</h3><p>Deterministic interpretations of this measurement</p></div></div>
+        <p class="insight-headline" id="insightHeadline"></p>
+        <ul class="insight-list" id="insightList"></ul>
+        <p class="insight-limitations" id="insightLimitations"></p>
+      </section>
     </section>
 
     <section class="details">
@@ -72,7 +111,7 @@
           <article class="concept"><span class="concept-index">02 / Rendering</span><h3>Frame rate <em>· FPS</em></h3><p>FPS counts the frames a rendering system produces or presents per second. Browser animation callbacks are commonly synchronized with a display pipeline, but results depend on the browser, operating system, GPU, power mode, display configuration, and variable refresh behavior. FPS does not always equal monitor refresh rate.</p></article>
           <article class="concept"><span class="concept-index">03 / Timing</span><h3>Frame time <em>· ms</em></h3><p>Frame time is the interval between frames. At 60 FPS, an average frame takes about 16.67 ms; at 120 FPS, 8.33 ms. Consistent timing matters: uneven intervals can make motion feel less smooth even when the average FPS looks unchanged.</p></article>
         </div>
-        <p class="method-note"><span>METHOD NOTE</span> RefreshTest estimates browser frame cadence from animation callback timestamps. It does not query the panel’s exact hardware refresh rate or measure pixel response time.</p>
+        <p class="method-note"><span>METHOD NOTE</span> RefreshTest estimates browser frame cadence from animation callback timestamps. It does not query the panel’s exact hardware refresh rate, count every GPU-presented frame, measure pixel response time, or verify VRR behavior.</p>
       </section>
 
       <section class="editorial-section" aria-labelledby="how-to-test">
@@ -139,8 +178,110 @@
         </div>
       </section>
     </div>
+    </section>
+
+    <section class="view" id="view-history" data-view="history" hidden aria-labelledby="historyTitle">
+      <header class="view-header">
+        <p class="eyebrow">Local archive <span>·</span> Browser storage</p>
+        <h1 id="historyTitle" tabindex="-1">Session <em>history.</em></h1>
+        <p class="view-lede">Saved measurements stay in this browser. Nothing is uploaded, and you can inspect, export, or delete each session.</p>
+      </header>
+      <section class="panel" aria-labelledby="historyToolsTitle">
+        <div class="panel-heading">
+          <span class="index">H</span>
+          <div><h2 id="historyToolsTitle">Saved sessions</h2><p>Explicit saves only · local to this browser</p></div>
+          <span class="panel-meta" id="historyStorageState">Checking storage…</span>
+        </div>
+        <div class="history-toolbar">
+          <div class="toolbar-group">
+            <input id="importFile" class="visually-hidden" type="file" accept="application/json,.json">
+            <label for="importFile" class="secondary-button file-button">Import sessions</label>
+            <button id="exportSelected" class="secondary-button" type="button" disabled>Export selected</button>
+          </div>
+          <button id="clearHistory" class="danger-button" type="button" disabled>Clear all</button>
+        </div>
+        <p id="historyStatus" class="inline-status" role="status" aria-live="polite"></p>
+        <div id="historyList" class="history-list"></div>
+        <div id="historyDetail" class="history-detail" hidden></div>
+      </section>
+      <p class="panel-note">Session data is stored with a versioned schema in <code>localStorage</code>. If storage is unavailable or full, RefreshTest reports the problem instead of discarding existing history. Imported files are validated before they are saved.</p>
+    </section>
+
+    <section class="view" id="view-compare" data-view="compare" hidden aria-labelledby="compareTitle">
+      <header class="view-header">
+        <p class="eyebrow">Cross-session <span>·</span> Descriptive analysis</p>
+        <h1 id="compareTitle" tabindex="-1">Session <em>comparison.</em></h1>
+        <p class="view-lede">Select two or more saved sessions. Values are absolute; differences use the earliest selected session as the baseline.</p>
+      </header>
+      <section class="panel" aria-labelledby="compareSelectionTitle">
+        <div class="panel-heading">
+          <span class="index">C</span>
+          <div><h2 id="compareSelectionTitle">Choose sessions</h2><p>Up to six sessions can be compared at once</p></div>
+          <span class="panel-meta" id="compareCount">0 selected</span>
+        </div>
+        <div id="compareSelector" class="compare-selector"></div>
+        <p id="compareStatus" class="inline-status" role="status" aria-live="polite"></p>
+        <div id="compareResults"></div>
+      </section>
+      <p class="panel-note">Differences describe measured browser animation-callback cadence only. They do not establish causation, identify a hardware fault, or measure the physical panel directly.</p>
+    </section>
+
+    <section class="view" id="view-lab" data-view="lab" hidden aria-labelledby="labTitle">
+      <header class="view-header">
+        <p class="eyebrow">Advanced lab <span>·</span> Distribution detail</p>
+        <h1 id="labTitle" tabindex="-1">Advanced <em>lab.</em></h1>
+        <p class="view-lede">Choose a longer measurement window and inspect the timing distribution behind the headline result. Every mode uses the same measurement and statistics pipeline.</p>
+      </header>
+      <section class="panel" aria-labelledby="labModesTitle">
+        <div class="panel-heading">
+          <span class="index">L</span>
+          <div><h2 id="labModesTitle">Measurement modes</h2><p>Active time; hidden-tab pauses are excluded</p></div>
+        </div>
+        <div class="lab-grid" id="labModes"></div>
+        <p class="panel-note">All modes share one run lifecycle, observation classifier, and final statistics function. Quick is useful for a smoke check; Standard is the default; Extended and Diagnostics trade a longer wait for more samples.</p>
+      </section>
+      <section class="panel" aria-labelledby="distributionTitle">
+        <div class="panel-heading">
+          <span class="index">D</span>
+          <div><h2 id="distributionTitle">Frame-interval distribution</h2><p>Accepted intervals only; long gaps are reported separately</p></div>
+          <span class="panel-meta" id="distributionMeta">No result</span>
+        </div>
+        <div id="distributionEmpty" class="empty-state">
+          <strong>No measurement yet</strong>
+          <p>Run a test in the Test view, then return here for the distribution and detailed metrics.</p>
+        </div>
+        <div id="distributionBody" hidden>
+          <canvas id="distributionCanvas" role="img" aria-label="Histogram of accepted frame intervals"></canvas>
+          <p id="distributionCaption" class="chart-caption"></p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="labMetricsTitle">
+        <div class="panel-heading">
+          <span class="index">M</span>
+          <div><h2 id="labMetricsTitle">Detailed metrics</h2><p>Same authoritative statistics as the test result</p></div>
+          <button id="exportReport" class="secondary-button" type="button" disabled>Export diagnostic report</button>
+        </div>
+        <div id="labMetricsEmpty" class="empty-state">
+          <strong>No detailed metrics</strong>
+          <p>Complete a measurement to calculate percentiles, coverage, variation, and gap accounting.</p>
+        </div>
+        <div class="table-scroll" id="labMetricsBody" hidden>
+          <table class="data-table">
+            <caption>Current measurement, recomputed from accepted raw intervals</caption>
+            <thead><tr><th scope="col">Metric</th><th scope="col">Value</th><th scope="col">Definition</th></tr></thead>
+            <tbody id="labMetrics"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
     <footer><p><span class="foot-mark">RT</span> REFRESHTEST <span class="foot-sep">/</span> FRAME PERFORMANCE TOOL</p><p class="caveat">Refresh rate is estimated from browser/VSync animation callback cadence. Background throttling, compositing, and dropped frames affect results; this is not a direct measurement of the physical panel.</p></footer>
   </main>
+  <script src="stats.js"></script>
+  <script src="measurement.js"></script>
+  <script src="insights.js"></script>
+  <script src="storage.js"></script>
+  <script src="comparison.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
